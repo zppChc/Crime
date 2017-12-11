@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.chc.criminalintent.CrimeList.PictureDisplayFragment;
 import com.chc.criminalintent.bean.Crime;
 import com.chc.criminalintent.bean.CrimeLab;
 import com.chc.criminalintent.config.CrimeTag;
@@ -114,10 +115,10 @@ public class CrimeFragment extends Fragment {
         mDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager manager = getFragmentManager();
+                FragmentManager managerDate = getFragmentManager();
                 DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
                 dialog.setTargetFragment(CrimeFragment.this,REQUEST_DATE);
-                dialog.show(manager,CrimeTag.DIALOG_DATE);
+                dialog.show(managerDate,CrimeTag.DIALOG_DATE);
             }
         });
 
@@ -179,6 +180,15 @@ public class CrimeFragment extends Fragment {
         });
         mPhotoView=(ImageView)view.findViewById(R.id.crime_photo);
         updatePhotoView();
+        mPhotoView.setEnabled(canTakePhoto);
+        mPhotoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager managerPicture = getFragmentManager();
+                PictureDisplayFragment fragment = PictureDisplayFragment.newInstance(mPhotoFile.getPath());
+                fragment.show(managerPicture,"picture");
+            }
+        });
     }
 
     private void updateDate(String text) {
