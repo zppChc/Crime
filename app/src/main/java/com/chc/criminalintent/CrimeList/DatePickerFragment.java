@@ -1,4 +1,4 @@
-package com.chc.criminalintent.utils;
+package com.chc.criminalintent.CrimeList;
 
 import android.app.Activity;
 import android.app.Dialog;
