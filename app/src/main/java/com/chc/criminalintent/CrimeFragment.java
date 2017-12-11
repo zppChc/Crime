@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,6 +29,7 @@ import com.chc.criminalintent.bean.Crime;
 import com.chc.criminalintent.bean.CrimeLab;
 import com.chc.criminalintent.config.CrimeTag;
 import com.chc.criminalintent.utils.DatePickerFragment;
+import com.chc.criminalintent.utils.PictureUtils;
 import com.chc.criminalintent.utils.TimeUtils;
 
 import java.io.File;
@@ -43,6 +46,7 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
+    private static final int REQUEST_PHOTO=2;
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
@@ -160,7 +164,21 @@ public class CrimeFragment extends Fragment {
         }
 
         mPhotoButton = (ImageButton)view.findViewById(R.id.crime_camera);
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        boolean  canTakePhoto = mPhotoFile != null && captureImage.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+        if (canTakePhoto){
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT,uri);
+        }
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivityForResult(captureImage,REQUEST_PHOTO);
+            }
+        });
         mPhotoView=(ImageView)view.findViewById(R.id.crime_photo);
+        updatePhotoView();
     }
 
     private void updateDate(String text) {
@@ -187,6 +205,14 @@ public class CrimeFragment extends Fragment {
         return report;
     }
 
+    private void updatePhotoView(){
+        if (mPhotoFile == null  || !mPhotoFile.exists()){
+            mPhotoView.setImageDrawable(null);
+        }else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(),getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK){
@@ -217,6 +243,9 @@ public class CrimeFragment extends Fragment {
             } finally {
                 c.close();
             }
+        } else if (requestCode == REQUEST_PHOTO ){
+            updatePhotoView();
+
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
